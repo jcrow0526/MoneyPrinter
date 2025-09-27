@@ -10,6 +10,29 @@ from termcolor import colored
 from dotenv import load_dotenv
 from typing import Tuple, List
 
+
+VOICE_LANGUAGE_MAP = {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "br": "Portuguese",
+    "id": "Indonesian",
+    "jp": "Japanese",
+    "kr": "Korean",
+}
+
+
+def infer_language_from_voice(voice: str) -> str:
+    """Infer a natural language name from the selected TikTok voice code."""
+
+    if not voice:
+        return "English"
+
+    voice_prefix = voice.lower().split("_")[0]
+
+    return VOICE_LANGUAGE_MAP.get(voice_prefix, "English")
+
 # Load environment variables
 load_dotenv("../.env")
 
@@ -91,6 +114,8 @@ def generate_script(video_subject: str, paragraph_number: int, ai_model: str, vo
 
     # Build prompt
     
+    language = infer_language_from_voice(voice)
+
     if customPrompt:
         prompt = customPrompt
     else:
@@ -118,7 +143,7 @@ def generate_script(video_subject: str, paragraph_number: int, ai_model: str, vo
     
     Subject: {video_subject}
     Number of paragraphs: {paragraph_number}
-    Language: {voice}
+    Language: {language}
 
     """
 
@@ -231,33 +256,38 @@ def get_search_terms(video_subject: str, amount: int, script: str, ai_model: str
     return search_terms
 
 
-def generate_metadata(video_subject: str, script: str, ai_model: str) -> Tuple[str, str, List[str]]:  
+def generate_metadata(video_subject: str, script: str, ai_model: str, voice: str) -> Tuple[str, str, List[str]]:
     """  
     Generate metadata for a YouTube video, including the title, description, and keywords.  
   
     Args:  
         video_subject (str): The subject of the video.  
         script (str): The script of the video.  
-        ai_model (str): The AI model to use for generation.  
+        ai_model (str): The AI model to use for generation.
+        voice (str): The TikTok voice identifier selected for narration.
   
     Returns:  
         Tuple[str, str, List[str]]: The title, description, and keywords for the video.  
     """  
   
-    # Build prompt for title  
-    title_prompt = f"""  
-    Generate a catchy and SEO-friendly title for a YouTube shorts video about {video_subject}.  
-    """  
+    language = infer_language_from_voice(voice)
+
+    # Build prompt for title
+    title_prompt = f"""
+    Generate a catchy and SEO-friendly title for a YouTube shorts video about {video_subject}.
+    Respond in {language}.
+    """
   
     # Generate title  
     title = generate_response(title_prompt, ai_model).strip()  
     
     # Build prompt for description  
-    description_prompt = f"""  
-    Write a brief and engaging description for a YouTube shorts video about {video_subject}.  
-    The video is based on the following script:  
-    {script}  
-    """  
+    description_prompt = f"""
+    Write a brief and engaging description for a YouTube shorts video about {video_subject}.
+    The video is based on the following script:
+    {script}
+    Respond in {language}.
+    """
   
     # Generate description  
     description = generate_response(description_prompt, ai_model).strip()  
