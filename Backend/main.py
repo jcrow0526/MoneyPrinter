@@ -96,6 +96,8 @@ def generate():
         
         voice = data["voice"]
         voice_prefix = voice[:2]
+        language = infer_language_from_voice(voice)
+        print(colored("   Language: " + language, "blue"))
 
 
         if not voice:
@@ -234,7 +236,7 @@ def generate():
             final_video_path = None
 
         # Define metadata for the video, we will display this to the user, and use it for the YouTube upload
-        title, description, keywords = generate_metadata(data["videoSubject"], script, ai_model)
+        title, description, keywords = generate_metadata(data["videoSubject"], script, ai_model, voice)
 
         print(colored("[-] Metadata for YouTube upload:", "blue"))
         print(colored("   Title: ", "blue"))
